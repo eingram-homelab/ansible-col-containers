@@ -9,7 +9,13 @@
   become_method: ansible.builtin.sudo
   become_user: "{{ user_account }}"
   block:
+    - name: Check permissions for PlexMedia folder
+      ansible.builtin.stat:
+        path: /mnt/pool0/PlexMedia
+      register: plex_srv_media_stat
+
     - name: Change user/owner of Plex files to {{ user_account }}
+      when: plex_srv_media_stat.stat.exists and (plex_srv_media_stat.stat.pw_name != user_account or plex_srv_media_stat.stat.gr_name != user_account)
       ansible.builtin.file:
         path: /mnt/pool0/PlexMedia
         state: directory
@@ -38,13 +44,13 @@
         network_mode: host
         device: "/dev/dri:/dev/dri"
         volume:
-          - /mnt/pool0/PlexMedia/config:/config:Z
-          - /mnt/pool0/PlexMedia/Movies:/movies:Z
-          - /mnt/pool0/PlexMedia/3DMovies:/3dmovies:Z
-          - /mnt/pool0/PlexMedia/AnimMovies:/animmovies:Z
-          - /mnt/pool0/PlexMedia/TVShows:/tvshows:Z
-          - /mnt/pool0/PlexMedia/AnimTVShows:/animtvshows:Z
-          - /mnt/pool0/PlexMedia/Videos:/videos:Z
+          - /mnt/pool0/PlexMedia/config:/config:z
+          - /mnt/pool0/PlexMedia/Movies:/movies:z
+          - /mnt/pool0/PlexMedia/3DMovies:/3dmovies:z
+          - /mnt/pool0/PlexMedia/AnimMovies:/animmovies:z
+          - /mnt/pool0/PlexMedia/TVShows:/tvshows:z
+          - /mnt/pool0/PlexMedia/AnimTVShows:/animtvshows:z
+          - /mnt/pool0/PlexMedia/Videos:/videos:z
         generate_systemd:
           path: "{{ '/home/' + user_account + '/.config/systemd/user' if user_account != 'root' else '/etc/systemd/system' }}"
           restart_policy: always
@@ -53,3 +59,9 @@
       ansible.builtin.include_role:
         name: eingram23.containers.common
         tasks_from: enable_sysd
+
+    - name: Set selinux boolean to allow samba to read/write to PlexMedia
+      ansible.posix.seboolean:
+        name: samba_export_all_rw
+        state: true
+        persistent: true
