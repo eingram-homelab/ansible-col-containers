@@ -1,8 +1,0 @@
----
-app_name: "grafana_agent"
-image: "docker.io/grafana/agent"
-upgrade: "no"
-migrate: "no"
-fw_port:
-  - "12345/tcp"
-user_account: "root"
