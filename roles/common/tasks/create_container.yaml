@@ -1,18 +1,19 @@
 - name: Create and run container - {{ app_name }}
   containers.podman.podman_container:
     name: "{{ app_name }}"
-    image: "{{ image }}:{{ ver }}"
+    image: "{{ image_repo }}/{{ app_name }}:{{ ver }}"
     state: stopped
-    restart_policy: always
+    restart_policy: unless-stopped
     privileged: "{{ privileged | default(omit) }}"
     publish: "{{ publish_port }}"
+    pod: "{{ pod_name | default(omit) }}"
     env:
-      "{{ cont_env | default(omit) }}"
+      "{{ env | default(omit) }}"
     tty: "{{ tty | default(omit) }}"
     interactive: "{{ interactive | default(omit) }}"
-    volume: "{{ volumes | default(omit) }}"
-    device: "{{ devices | default(omit) }}"
-    command: "{{ cont_command | default(omit) }}"
+    volume: "{{ volume | default(omit) }}"
+    device: "{{ device | default(omit) }}"
+    command: "{{ command | default(omit) }}"
     generate_systemd:
       path: "{{ '/home/' + user_account + '/.config/systemd/user' if user_account != 'root' else '/etc/systemd/system' }}"
       restart_policy: always

@@ -1,0 +1,24 @@
+- name: Create pod - {{ app_name }}
+  containers.podman.podman_pod:
+    name: "{{ app_name }}"
+    state: created
+    publish: "{{ publish_port }}"
+
+- name: Create and run containers in pod - {{ app_name }}
+  containers.podman.podman_container:
+    name: "{{ container.value.container_name }}"
+    image: "{{ container.value.image_repo }}/{{ container.value.container_name }}:{{ container.value.ver }}"
+    state: stopped
+    restart_policy: unless-stopped
+    privileged: "{{ container.value.privileged | default(omit) }}"
+    pod: "{{ app_name }}"
+    env: "{{ container.value.env | default(omit) }}"
+    tty: "{{ container.value.tty | default(omit) }}"
+    interactive: "{{ container.value.interactive | default(omit) }}"
+    volume: "{{ container.value.volume | default(omit) }}"
+    device: "{{ container.value.device | default(omit) }}"
+    command: "{{ container.value.command | default(omit) }}"
+  loop: "{{ containers | dict2items }}"
+  loop_control:
+    label: "{{ container.value.container_name }}"
+    loop_var: container

@@ -1,32 +1,85 @@
-- name: Enable root service - container-{{ app_name }}
-  when: user_account == 'root'
-  ansible.builtin.systemd:
-    name: container-{{ app_name }}
-    state: started
-    enabled: true
-    daemon_reload: true
-
-- name: Enable user service - container-{{ app_name }}
-  when: user_account != 'root'
+- name: Enable systemd service for conainer {{ app_name }}
+  when: containers is not defined
   block:
-    - name: Set XDG_RUNTIME_DIR env variable
-      ansible.builtin.lineinfile:
-        path: /home/{{ user_account }}/.bash_profile
-        search_string: 'export XDG_RUNTIME_DIR=/run/user/$(id -u)'
-        insertafter: '# User specific environment and startup programs'
-        line: 'export XDG_RUNTIME_DIR=/run/user/$(id -u)'
-
-    - name: Get info for {{ user_account }}
-      ansible.builtin.user:
-        name: "{{ user_account }}"
-      register: user_info
-
-    - name: Enable service - container-{{ app_name }}
+    - name: Enable root service - container-{{ app_name }}
+      when: user_account == 'root'
       ansible.builtin.systemd:
         name: container-{{ app_name }}
         state: started
         enabled: true
         daemon_reload: true
-        scope: user
-      environment:
-        XDG_RUNTIME_DIR: /run/user/{{ user_info.uid }}
+
+    - name: Enable user service - container-{{ app_name }}
+      when: user_account != 'root'
+      block:
+        - name: Set XDG_RUNTIME_DIR env variable
+          ansible.builtin.lineinfile:
+            path: /home/{{ user_account }}/.bash_profile
+            search_string: 'export XDG_RUNTIME_DIR=/run/user/$(id -u)'
+            insertafter: '# User specific environment and startup programs'
+            line: 'export XDG_RUNTIME_DIR=/run/user/$(id -u)'
+
+        - name: Get info for {{ user_account }}
+          ansible.builtin.user:
+            name: "{{ user_account }}"
+          register: user_info
+
+        - name: Enable service - container-{{ app_name }}
+          ansible.builtin.systemd:
+            name: container-{{ app_name }}
+            state: started
+            enabled: true
+            daemon_reload: true
+            scope: user
+          environment:
+            XDG_RUNTIME_DIR: /run/user/{{ user_info.uid }}
+
+- name: Enable systemd service for pod {{ app_name }}
+  when: containers is defined
+  block:
+    - name: Generate systemd units for {{ app_name }}
+      containers.podman.podman_generate_systemd:
+        name: "{{ app_name }}"
+        no_header: true
+        restart_policy: always
+        dest: /etc/systemd/system/
+
+    - name: Enable root service - pod-{{ app_name }}
+      when: user_account == 'root'
+      ansible.builtin.systemd:
+        name: pod-{{ app_name }}
+        state: started
+        enabled: true
+        daemon_reload: true
+
+    - name: Enable user service - pod-{{ app_name }}
+      when: user_account != 'root'
+      block:
+        - name: Set XDG_RUNTIME_DIR env variable
+          ansible.builtin.lineinfile:
+            path: /home/{{ user_account }}/.bash_profile
+            search_string: 'export XDG_RUNTIME_DIR=/run/user/$(id -u)'
+            insertafter: '# User specific environment and startup programs'
+            line: 'export XDG_RUNTIME_DIR=/run/user/$(id -u)'
+
+        - name: Get info for {{ user_account }}
+          ansible.builtin.user:
+            name: "{{ user_account }}"
+          register: user_info
+
+        - name: Generate systemd units for {{ app_name }}
+          containers.podman.podman_generate_systemd:
+            name: "{{ app_name }}"
+            no_header: true
+            restart_policy: always
+            dest: ~/.config/systemd/user/
+
+        - name: Enable service - pod-{{ app_name }}
+          ansible.builtin.systemd:
+            name: pod-{{ app_name }}
+            state: started
+            enabled: true
+            daemon_reload: true
+            scope: user
+          environment:
+            XDG_RUNTIME_DIR: /run/user/{{ user_info.uid }}

@@ -16,7 +16,7 @@
   loop:
     - podman
     - podman-compose
-    - podman-plugins
+    # - podman-plugins
     - podman-remote
   loop_control:
     loop_var: podman_items

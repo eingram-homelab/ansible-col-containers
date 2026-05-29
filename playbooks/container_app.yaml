@@ -1,0 +1,25 @@
+---
+- name: Deploy container app
+  hosts: "{{ hostvar | default([]) }}"
+  become: false
+  gather_facts: false
+
+  vars_files:
+    - "vars/{{ app_name }}.yaml"
+
+  tasks:
+
+    - name: Assert vars
+      ansible.builtin.assert:
+        that:
+          - app_name is defined
+          - user_account is defined
+          - task is defined
+          - task in ['install', 'uninstall', 'upgrade']
+        fail_msg: "The variables 'app_name', 'user_account', and 'task' must be defined. The 'task' variable must be set to either 'install', 'uninstall', or 'upgrade'."
+        success_msg: "All required variables are properly defined."
+
+    - name: Manage container app - {{ app_name }}
+      ansible.builtin.include_role:
+        name: eingram23.containers.container_app
+        tasks_from: "{{ task }}"

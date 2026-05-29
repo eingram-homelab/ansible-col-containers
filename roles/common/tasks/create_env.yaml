@@ -8,7 +8,7 @@
         name: eingram23.linux.user_mgmt
         tasks_from: add_user
       vars:
-        user_account: "{{ user_account }}"
+        # user_account: "{{ user_account }}"
         user_password: "{{ lookup('hashi_vault', 'secret=secret/ssh/ansible:ssh_password') }}"
         admin_user: "no"
 
@@ -19,7 +19,7 @@
       loop:
         - podman
         - podman-compose
-        - podman-plugins
+        # - podman-plugins
         - podman-remote
       loop_control:
         loop_var: podman_items

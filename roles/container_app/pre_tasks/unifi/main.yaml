@@ -1,0 +1,20 @@
+- name: Create unifi config folder
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: root
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    mode: '0755'
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"
+  loop:
+    - /opt/{{ app_name }}/config
+
+- name: Create mongodb init on host
+  ansible.builtin.template:
+    src: "{{ role_path }}/templates/{{ app_name }}/init-mongo.js.j2"
+    dest: "/opt/{{ app_name }}/init-mongo.js"
+    mode: '0755'
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"

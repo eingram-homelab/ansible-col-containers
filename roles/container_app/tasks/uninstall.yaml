@@ -1,0 +1,152 @@
+- name: Run root tasks
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: root
+  block:
+    - name: Close firewall ports
+      when: fw_port is defined
+      ansible.builtin.include_role:
+        name: eingram23.linux.firewall
+        tasks_from: delete
+
+    - name: Remove folder for {{ app_name }}
+      ansible.builtin.file:
+        path: /opt/{{ app_name }}
+        state: absent
+
+- name: Run tasks as {{ user_account | default('root') }}
+  become: true
+  become_method: ansible.builtin.sudo
+  become_user: "{{ user_account | default('root') }}"
+  block:
+    # Pod mode: remove multiple containers and the pod
+    - name: Remove pod and containers when in pod mode
+      when: containers is defined
+      block:
+        - name: Stop and disable service for each container - {{ app_name }}
+          ansible.builtin.systemd:
+            name: "container-{{ container.value.container_name }}"
+            state: stopped
+            scope: "{{ 'user' if user_account != 'root' else 'system' }}"
+            enabled: false
+            daemon_reload: true
+          loop: "{{ containers | dict2items }}"
+          loop_control:
+            label: "{{ container.value.container_name }}"
+            loop_var: container
+
+        - name: Remove systemd service files for containers in pod - {{ app_name }}
+          ansible.builtin.file:
+            path: "{{ '/home/' + user_account + '/.config/systemd/user/container-' + container.value.container_name + '.service' if user_account != 'root' else '/etc/systemd/system/container-' + container.value.container_name + '.service' }}"
+            state: absent
+          loop: "{{ containers | dict2items }}"
+          loop_control:
+            label: "{{ container.value.container_name }}"
+            loop_var: container
+
+        - name: Remove systemd service file for pod - pod-{{ app_name }}
+          ansible.builtin.file:
+            path: "{{ '/home/' + user_account + '/.config/systemd/user/pod-' + app_name + '.service' if user_account != 'root' else '/etc/systemd/system/pod-' + app_name + '.service' }}"
+            state: absent
+
+        - name: Get pod info for {{ app_name }}
+          containers.podman.podman_pod_info:
+            name: "{{ app_name }}"
+          register: pod_info
+          ignore_errors: true
+
+        - name: Remove container - {{ app_name }}
+          when: 
+            - pod_info.pods | length > 0
+            - pod_container.value.container_name in pod_info.pods[0].Containers | map(attribute='Name') | list
+          containers.podman.podman_container:
+            name: "{{ pod_container.value.container_name }}"
+            state: absent
+            delete_volumes: true
+          loop: "{{ containers | dict2items }}"
+          loop_control:
+            label: "{{ pod_container.value.container_name }}"
+            loop_var: pod_container
+
+        - name: Remove pod - {{ app_name }}
+          when: pod_info.pods | length > 0
+          containers.podman.podman_pod:
+            name: "{{ app_name }}"
+            state: absent
+        
+        - name: Get container info for {{ app_name }}
+          containers.podman.podman_container_info:
+            name: "{{ container_name.value.container_name }}"
+          register: container_info
+          ignore_errors: true
+          loop: "{{ containers | dict2items }}"
+          loop_control:
+            label: "{{ container_name.value.container_name }}"
+            loop_var: container_name
+
+        - debug: var=container_info
+
+        - name: Collect volume mounts from pod containers - {{ app_name }}
+          ansible.builtin.set_fact:
+            pod_container_mounts: >-
+              {{
+                (pod_container_mounts | default([]))
+                +
+                (
+                  item.containers[0].Mounts
+                  if (item.containers is defined and item.containers | length > 0)
+                  else []
+                )
+              }}
+          loop: "{{ container_info.results | default([]) }}"
+
+        - name: Delete all volumes for pod containers - {{ app_name }}
+          when: (pod_container_mounts | default([]) | selectattr('Name', 'defined') | list | length) > 0
+          containers.podman.podman_volume:
+            name: "{{ vol_item.Name }}"
+            state: absent
+          loop: "{{ pod_container_mounts | default([]) | selectattr('Name', 'defined') | list }}"
+          loop_control:
+            loop_var: vol_item
+
+    # Single container mode: remove the single container
+    - name: Remove single container when not in pod mode
+      when: containers is not defined
+      block:
+        - name: Get container info for {{ app_name }}
+          containers.podman.podman_container_info:
+            name: "{{ app_name }}"
+          register: app_info
+          ignore_errors: true
+
+        - name: Remove container if found - {{ app_name }}
+          when: app_info.containers | length > 0
+          block:
+            - name: Stop and disable service - container-{{ app_name }}
+              ansible.builtin.systemd:
+                name: "container-{{ app_name }}"
+                state: stopped
+                scope: "{{ 'user' if user_account != 'root' else 'system' }}"
+                enabled: false
+                daemon_reload: true
+
+            - name: Remove systemd service file - {{ app_name }}
+              ansible.builtin.file:
+                path: "{{ '/home/' + user_account + '/.config/systemd/user/container-' + app_name + '.service' if user_account != 'root' else '/etc/systemd/system/container-' + app_name + '.service' }}"
+                state: absent
+
+            - name: Remove container - {{ app_name }}
+              containers.podman.podman_container:
+                name: "{{ app_name }}"
+                state: absent
+                delete_volumes: true
+
+            - name: Delete all volumes for {{ app_name }}
+              when: app_info.containers[0].Mounts | length > 0
+              containers.podman.podman_volume:
+                name: "{{ vol_item.Name }}"
+                state: absent
+              loop: "{{ app_info.containers[0].Mounts | selectattr('Name', 'defined') | list }}"
+              loop_control:
+                loop_var: vol_item
+

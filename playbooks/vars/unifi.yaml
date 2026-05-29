@@ -1,0 +1,47 @@
+---
+app_name: unifi
+user_account: "poduser"
+fw_port:
+  - "3478/udp"
+  - "10001/udp"
+  - "8080/tcp"
+  - "8443/tcp"
+  - "1900/udp"
+  - "8843/tcp"
+  - "8880/tcp"
+  - "6789/tcp"
+  - "5514/tcp"
+publish_port:
+  - "3478:3478/udp"
+  - "10001:10001/udp"
+  - "8080:8080/tcp"
+  - "8443:8443/tcp"
+  - "1900:1900/udp"
+  - "8843:8843/tcp"
+  - "8880:8880/tcp"
+  - "6789:6789/tcp"
+  - "5514:5514/tcp"
+containers:
+  unifi:
+    container_name: "unifi-network-application"
+    image_repo: "lscr.io/linuxserver"
+    ver: "10.3.58"
+    env:
+      PUID=1000
+      PGID=1000
+      MONGO_USER=unifi
+      MONGO_PASS={{ lookup('hashi_vault', 'secret=secret/ssh/eingram:ssh_password') }}
+      MONGO_HOST=mongo
+      MONGO_PORT=27017
+      MONGO_DBNAME=unifi
+      MEM_LIMIT=1024
+      MEM_STARTUP=1024
+    volume:
+      - "/opt/{{ app_name }}/config:/config:Z"
+  mongo:
+    container_name: "mongo"
+    image_repo: "docker.io"
+    ver: "8.3.2"
+    volume:
+      - "{{ app_name }}-db-data:/data/db"
+      - "/opt/{{ app_name }}/init-mongo.js:/docker-entrypoint-initdb.d/init-mongo.js:ro"

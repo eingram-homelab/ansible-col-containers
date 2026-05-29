@@ -1,0 +1,93 @@
+- name: Remove pod and containers when in pod mode
+  when: containers is defined
+  block:
+    - name: Stop and disable service for pod - pod-{{ app_name }}
+      ansible.builtin.systemd:
+        name: "pod-{{ app_name }}"
+        state: stopped
+        scope: "{{ 'user' if user_account != 'root' else 'system' }}"
+        enabled: false
+        daemon_reload: true
+
+    - name: Stop and disable service for each container - {{ app_name }}
+      ansible.builtin.systemd:
+        name: "container-{{ container.value.container_name }}"
+        state: stopped
+        scope: "{{ 'user' if user_account != 'root' else 'system' }}"
+        enabled: false
+        daemon_reload: true
+      loop: "{{ containers | dict2items }}"
+      loop_control:
+        label: "{{ container.value.container_name }}"
+        loop_var: container
+
+    - name: Remove systemd service files for containers in pod - {{ app_name }}
+      ansible.builtin.file:
+        path: "{{ '/home/' + user_account + '/.config/systemd/user/container-' + container.value.container_name + '.service' if user_account != 'root' else '/etc/systemd/system/container-' + container.value.container_name + '.service' }}"
+        state: absent
+      loop: "{{ containers | dict2items }}"
+      loop_control:
+        label: "{{ container.value.container_name }}"
+        loop_var: container
+
+    - name: Remove systemd service file for pod - pod-{{ app_name }}
+      ansible.builtin.file:
+        path: "{{ '/home/' + user_account + '/.config/systemd/user/pod-' + app_name + '.service' if user_account != 'root' else '/etc/systemd/system/pod-' + app_name + '.service' }}"
+        state: absent
+
+    - name: Get pod info for {{ app_name }}
+      containers.podman.podman_pod_info:
+        name: "{{ app_name }}"
+      register: pod_info
+      ignore_errors: true
+
+    - name: Remove container - {{ app_name }}
+      when: 
+        - pod_info.pods | length > 0
+        - pod_container.value.container_name in pod_info.pods[0].Containers | map(attribute='Name') | list
+      containers.podman.podman_container:
+        name: "{{ pod_container.value.container_name }}"
+        state: absent
+        delete_volumes: false
+      loop: "{{ containers | dict2items }}"
+      loop_control:
+        label: "{{ pod_container.value.container_name }}"
+        loop_var: pod_container
+
+    - name: Remove pod - {{ app_name }}
+      when: pod_info.pods | length > 0
+      containers.podman.podman_pod:
+        name: "{{ app_name }}"
+        state: absent
+
+# Single container mode: remove the single container
+- name: Remove single container when not in pod mode
+  when: containers is not defined
+  block:
+    - name: Get container info for {{ app_name }}
+      containers.podman.podman_container_info:
+        name: "{{ app_name }}"
+      register: app_info
+      ignore_errors: true
+
+    - name: Remove container if found - {{ app_name }}
+      when: app_info.containers | length > 0
+      block:
+        - name: Stop and disable service - container-{{ app_name }}
+          ansible.builtin.systemd:
+            name: "container-{{ app_name }}"
+            state: stopped
+            scope: "{{ 'user' if user_account != 'root' else 'system' }}"
+            enabled: false
+            daemon_reload: true
+
+        - name: Remove systemd service file for {{ app_name }}
+          ansible.builtin.file:
+            path: "{{ '/home/' + user_account + '/.config/systemd/user/container-' + app_name + '.service' if user_account != 'root' else '/etc/systemd/system/container-' + app_name + '.service' }}"
+            state: absent
+
+        - name: Remove container - {{ app_name }}
+          containers.podman.podman_container:
+            name: "{{ app_name }}"
+            state: absent
+            delete_volumes: false

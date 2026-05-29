@@ -1,0 +1,63 @@
+---
+- name: Check for pretasks for {{ app_name }}
+  ansible.builtin.find:
+    paths: "{{ role_path }}/pre_tasks/{{ app_name }}/"
+    patterns: "*.yaml"
+  register: pretasks
+  delegate_to: localhost
+
+- name: Check for posttasks for {{ app_name }}
+  ansible.builtin.find:
+    paths: "{{ role_path }}/post_tasks/{{ app_name }}"
+    patterns: "*.yaml"
+  register: posttasks
+  delegate_to: localhost
+
+- name: Run tasks as {{ user_account }}
+  become: true
+  become_user: "{{ user_account }}"
+  become_method: ansible.builtin.sudo
+  block:
+    - name: Install env for {{ app_name }}
+      ansible.builtin.include_role:
+        name: eingram23.containers.common
+        tasks_from: create_env
+
+    - name: Run pretasks for {{ app_name }}
+      when: pretasks.matched > 0
+      ansible.builtin.include_tasks:
+        file: "{{ pretask_file.path }}"
+      loop: "{{ pretasks.files }}"
+      loop_control:
+        loop_var: pretask_file
+
+    - name: Prep for upgrade
+      when: upgrade | default(false)
+      ansible.builtin.include_role:
+        name: eingram23.containers.container_app
+        tasks_from: upgrade
+
+    - name: Create pod for {{ app_name }}
+      when: containers is defined
+      ansible.builtin.include_role:
+        name: eingram23.containers.common
+        tasks_from: create_pod
+
+    - name: Create container - {{ app_name }}
+      when: containers is not defined
+      ansible.builtin.include_role:
+        name: eingram23.containers.common
+        tasks_from: create_container
+
+    - name: Enable systemd service for {{ app_name }}
+      ansible.builtin.include_role:
+        name: eingram23.containers.common
+        tasks_from: enable_sysd
+
+    - name: Run posttasks for {{ app_name }}
+      when: posttasks.matched > 0
+      ansible.builtin.include_tasks:
+        file: "{{ posttask_file.path }}"
+      loop: "{{ posttasks.files }}"
+      loop_control:
+        loop_var: posttask_file

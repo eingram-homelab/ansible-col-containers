@@ -1,0 +1,8 @@
+- name: Hide mongo pw in init script
+  ansible.builtin.lineinfile:
+    path: "/opt/{{ app_name }}/init-mongo.js"
+    search_string: "{{ lookup('hashi_vault', 'secret=secret/ssh/eingram:ssh_password') }}"
+    line: var pwd = ""
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"
+    mode: '0644'
