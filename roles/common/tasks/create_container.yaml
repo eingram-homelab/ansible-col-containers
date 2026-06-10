@@ -1,7 +1,7 @@
 - name: Create and run container - {{ app_name }}
   containers.podman.podman_container:
     name: "{{ app_name }}"
-    image: "{{ image_repo }}/{{ app_name }}:{{ ver }}"
+    image: "{{ image_repo }}/{{ image_name }}:{{ ver }}"
     state: stopped
     restart_policy: unless-stopped
     privileged: "{{ privileged | default(omit) }}"

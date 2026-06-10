@@ -1,0 +1,8 @@
+---
+- name: Create blackbox.yaml on remote server
+  ansible.builtin.copy:
+    src: blackbox.yml
+    dest: /opt/{{ app_name }}/blackbox.yml
+    mode: '0644'
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"

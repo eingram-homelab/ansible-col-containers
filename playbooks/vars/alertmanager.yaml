@@ -1,0 +1,10 @@
+---
+app_name: "alertmanager"
+user_account: "poduser"
+image_name: "alertmanager"
+image_repo: "docker.io/prom"
+ver: "v0.32.2"
+fw_port:
+  - "9093/tcp"
+publish_port:
+  - "9093:9093"

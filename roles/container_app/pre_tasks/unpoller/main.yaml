@@ -1,0 +1,6 @@
+---
+- name: Create unpoller config file on remote host
+  ansible.builtin.template:
+    src: up.conf.j2
+    dest: /opt/{{ app_name }}/up.conf
+    mode: '0644'

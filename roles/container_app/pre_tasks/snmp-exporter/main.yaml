@@ -1,0 +1,22 @@
+---
+- name: Check net.ipv4.ip_unprivileged_port_start value
+  ansible.builtin.command: grep -oP '^net.ipv4.ip_unprivileged_port_start=\K\d+' /etc/sysctl.conf
+  register: sysctl_conf
+  ignore_errors: true
+  changed_when: false
+
+- name: Set net.ipv4.ip_unprivileged_port_start if needed
+  become: true
+  become_user: root
+  ansible.builtin.sysctl:
+    name: net.ipv4.ip_unprivileged_port_start
+    value: '116'
+  when: sysctl_conf.stdout == "" or (sysctl_conf.stdout | int) > 116
+
+- name: Copy snmp_exporter files to remote server
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /opt/{{ app_name }}/{{ item }}
+    mode: '0644'
+  loop:
+    - snmp.yml

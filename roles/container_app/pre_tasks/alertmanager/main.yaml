@@ -1,0 +1,8 @@
+---
+- name: Create alertmanager.yml on remote server
+  ansible.builtin.template:
+    src: alertmanager.yml.j2
+    dest: /opt/{{ app_name }}/alertmanager.yml
+    mode: '0644'
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"

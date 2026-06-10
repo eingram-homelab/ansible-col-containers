@@ -1,0 +1,10 @@
+---
+app_name: "blackbox-exporter"
+user_account: "poduser"
+image_name: "blackbox-exporter"
+image_repo: "docker.io/prom"
+ver: "v0.28.0"
+fw_port:
+  - "9115/tcp"
+publish_port:
+  - "9115:9115"

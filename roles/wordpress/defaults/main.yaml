@@ -1,8 +1,0 @@
----
-app: "{{ env }}-wordpress"
-root: '/home/poduser/code/'
-builddir: '/home/poduser/build/'
-repo: 'git@github.com:eingram23/'
-mysql_wp_root: "{{ lookup('hashi_vault', 'secret=secret/mysql/wordpress:mysql_pw') }}"
-mysql_wp: "{{ lookup('hashi_vault', 'secret=secret/mysql/wordpress:mysql_pw') }}"
-privkey: "{{ lookup('hashi_vault', 'secret=secret/git/ssh:key') }}"

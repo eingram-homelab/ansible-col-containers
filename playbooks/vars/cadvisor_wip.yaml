@@ -1,0 +1,10 @@
+---
+app_name: "cadvisor"
+image_name: "cadvisor"
+image_repo: "gcr.io/cadvisor"
+ver: "v0.33.0"
+fw_port:
+  - "8085/tcp"
+app_port: "8085"
+publish_port:
+  - "8085:8080"

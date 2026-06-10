@@ -1,9 +1,0 @@
----
-app_name: "unpoller"
-user_account: "poduser"
-image: "ghcr.io/unpoller/unpoller"
-upgrade: "no"
-fw_port:
-  - "9130/tcp"
-publish_port:
-  - "9130:9130"

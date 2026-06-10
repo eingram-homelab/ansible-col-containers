@@ -1,8 +1,0 @@
----
-app_name: "alertmanager"
-image: "docker.io/prom/alertmanager"
-upgrade: "no"
-fw_port:
-  - "9093/tcp"
-publish_port:
-  - "9093:9093"

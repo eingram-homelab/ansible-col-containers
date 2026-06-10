@@ -1,0 +1,12 @@
+---
+app_name: "unpoller"
+user_account: "poduser"
+container_name: "unpoller"
+image_repo: "ghcr.io/unpoller"
+ver: "v3.2.0"
+fw_port:
+  - "9130/tcp"
+publish_port:
+  - "9130:9130"
+volume:
+  - /opt/{{ app_name }}/up.conf:/etc/unpoller/up.conf

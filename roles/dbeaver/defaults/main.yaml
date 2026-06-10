@@ -1,9 +1,0 @@
----
-app_name: "dbeaver"
-image: "dbeaver/cloudbeaver"
-upgrade: "no"
-fw_port:
-  - "8978/tcp"
-user_account: "poduser"
-publish_port:
-  - "8978:8978"
