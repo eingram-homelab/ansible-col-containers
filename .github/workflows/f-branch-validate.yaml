@@ -10,7 +10,7 @@ permissions:
 jobs:
   ansible-playbook-checks:
     name: Ansible Playbook Feature Branch Workflow Checks
-    uses: eingram-homelab/reusable_workflows/.github/workflows/_flattened-ansible-f-workflow-checks.yaml@main
+    uses: eingram-homelab/reusable-workflows/.github/workflows/_flattened-ansible-f-workflow-checks.yaml@main
     with:
       repository: ${{ github.repository }}
       ref: ${{ github.head_ref || github.ref_name }}
