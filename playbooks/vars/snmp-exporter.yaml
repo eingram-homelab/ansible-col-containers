@@ -1,7 +1,7 @@
 ---
 app_name: "snmp-exporter"
 user_account: "poduser"
-container_name: "snmp-exporter"
+image_name: "snmp-exporter"
 image_repo: "docker.io/prom"
 ver: "v0.30.1"
 fw_port:

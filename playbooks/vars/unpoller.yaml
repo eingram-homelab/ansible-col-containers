@@ -1,7 +1,7 @@
 ---
 app_name: "unpoller"
 user_account: "poduser"
-container_name: "unpoller"
+image_name: "unpoller"
 image_repo: "ghcr.io/unpoller"
 ver: "v3.2.0"
 fw_port:

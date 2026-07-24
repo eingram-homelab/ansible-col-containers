@@ -1,0 +1,49 @@
+---
+- name: Create vault config directory on remote server
+  ansible.builtin.file:
+    path: /opt/{{ app_name }}/config
+    state: directory
+    mode: '0755'
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"
+
+- name: Set default vault.hcl template variables
+  when: azure_client_id is not defined
+  ansible.builtin.set_fact:
+    azure_client_id: "{{ lookup('hashi_vault', 'secret=secret/azure/app/hl-vault1:id') }}"
+    azure_client_secret: "{{ lookup('hashi_vault', 'secret=secret/azure/app/hl-vault1:secret') }}"
+    azure_tenant_id: "{{ lookup('hashi_vault', 'secret=secret/azure/tenant:id') }}"
+    azure_vault_name: "kv-hl-vault1"
+    azure_key_name: "vault-unseal-key"
+
+- name: Create vault.hcl on remote server
+  ansible.builtin.template:
+    src: vault.hcl.j2
+    dest: /opt/{{ app_name }}/config/vault.hcl
+    mode: '0644'
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"
+
+- name: Create vault certs directory on remote server
+  ansible.builtin.file:
+    path: /opt/{{ app_name }}/certs
+    state: directory
+    mode: '0755'
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"
+
+- name: Create vault ssl cert on remote server
+  ansible.builtin.copy:
+    content: "{{ lookup('hashi_vault', 'secret=secret/certs/vault.ycdisp.net:cert') | b64decode }}"
+    dest: /opt/{{ app_name }}/certs/vault.crt
+    mode: '0444'
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"
+
+- name: Create vault ssl key on remote server
+  ansible.builtin.copy:
+    content: "{{ lookup('hashi_vault', 'secret=secret/certs/vault.ycdisp.net:key') | b64decode }}"
+    dest: /opt/{{ app_name }}/certs/vault.key
+    mode: '0444'
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"

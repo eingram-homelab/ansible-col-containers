@@ -1,3 +1,4 @@
+---
 - name: Create unifi config folder
   become: true
   become_method: ansible.builtin.sudo

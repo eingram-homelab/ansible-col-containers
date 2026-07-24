@@ -23,7 +23,6 @@ publish_port:
   - "5514:5514/tcp"
 containers:
   unifi:
-    container_name: "unifi-network-application"
     image_repo: "lscr.io/linuxserver"
     ver: "10.3.58"
     env:
@@ -39,7 +38,6 @@ containers:
     volume:
       - "/opt/{{ app_name }}/config:/config:Z"
   mongo:
-    container_name: "mongo"
     image_repo: "docker.io"
     ver: "8.3.2"
     volume:

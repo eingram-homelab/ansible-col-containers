@@ -1,0 +1,23 @@
+---
+app_name: "vault"
+user_account: "poduser"
+image_name: "vault"
+image_repo: "docker.io/hashicorp"
+ver: "2.0"
+fw_port:
+  - 8200/tcp
+  - 8201/tcp
+publish_port:
+  - 8200:8200
+  - 8201:8201
+command: >
+  server
+volume:
+  - /opt/{{ app_name }}/config:/vault/config:z
+  - /opt/{{ app_name }}/certs:/vault/certs:z
+  - vault-data:/vault/data:U
+  - vault-logs:/vault/logs:U
+env:
+  VAULT_ADDR=https://127.0.0.1:8200
+  VAULT_API_ADDR=https://vault.ycdisp.net:8200
+  VAULT_SKIP_VERIFY=false

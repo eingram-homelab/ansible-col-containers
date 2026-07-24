@@ -13,7 +13,9 @@
       ansible.builtin.assert:
         that:
           - user_account is defined
-        fail_msg: "The variable 'user_account' must be defined. If this is a monitoring container (e.g., cadvisor), specify which user account to install under."
+        fail_msg: |
+          "The variable 'user_account' must be defined."
+          "If this is a monitoring container (e.g., cadvisor), specify which user account to install under."
         success_msg: "The variable 'user_account' is properly defined."
 
     - name: Assert vars
@@ -22,7 +24,9 @@
           - app_name is defined
           - task is defined
           - task in ['install', 'uninstall', 'upgrade']
-        fail_msg: "The variables 'app_name', 'user_account', and 'task' must be defined. The 'task' variable must be set to either 'install', 'uninstall', or 'upgrade'."
+        fail_msg: |
+          "The variables 'app_name', 'user_account', and 'task' must be defined."
+          "The 'task' variable must be set to either 'install', 'uninstall', or 'upgrade'."
         success_msg: "All required variables are properly defined."
 
     - name: Manage container app - {{ app_name }}

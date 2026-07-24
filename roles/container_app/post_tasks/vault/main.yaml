@@ -1,0 +1,5 @@
+---
+- name: Initialize vault
+  containers.podman.podman_container_exec:
+    name: "{{ app_name }}"
+    command: "cat redhat-release"
