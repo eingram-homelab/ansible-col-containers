@@ -3,7 +3,7 @@ app_name: "vault"
 user_account: "poduser"
 image_name: "vault"
 image_repo: "docker.io/hashicorp"
-ver: "2.0"
+ver: "2.1"
 fw_port:
   - 8200/tcp
   - 8201/tcp
