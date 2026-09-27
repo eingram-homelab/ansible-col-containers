@@ -1,0 +1,15 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"customManagers": [
+		{
+			"customType": "regex",
+			"managerFilePatterns": ["/playbooks/vars/.*\\.ya?ml$/"],
+			"matchStrings": [
+				"image_name:\\s*[\"']?(?<image_name>[^\"'\\s]+)[\"']?[\\s\\S]*?image_repo:\\s*[\"']?(?<image_repo>[^\"'\\s]+)[\"']?[\\s\\S]*?ver:\\s*[\"']?(?<currentValue>[^\"'\\s]+)"
+			],
+			"depNameTemplate": "{{{image_repo}}}/{{{image_name}}}",
+			"datasourceTemplate": "docker",
+			"versioningTemplate": "docker"
+		}
+	]
+}
