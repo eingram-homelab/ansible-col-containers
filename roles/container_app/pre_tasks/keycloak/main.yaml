@@ -1,0 +1,12 @@
+---
+- name: Create tls cert for Keycloak
+  ansible.builtin.copy:
+    content: "{{ lookup('hashi_vault', 'secret=secret/cert/keycloak:crt') }}"
+    dest: /opt/{{ app_name }}/tls.crt
+    mode: '0644'
+
+- name: Create tls key for Keycloak
+  ansible.builtin.copy:
+    content: "{{ lookup('hashi_vault', 'secret=secret/cert/keycloak:key') }}"
+    dest: /opt/{{ app_name }}/tls.key
+    mode: '0644'

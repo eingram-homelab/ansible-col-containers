@@ -1,0 +1,21 @@
+---
+app_name: "keycloak"
+user_account: "poduser"
+image_name: "keycloak"
+image_repo: "quay.io/keycloak"
+ver: "26.7.4"
+fw_port:
+  - "8080/tcp"
+  - "8443/tcp"
+publish_port:
+  - "8080:8080"
+  - "8443:8443"
+env:
+  KC_BOOTSTRAP_ADMIN_USERNAME=admin
+  KC_BOOTSTRAP_ADMIN_PASSWORD={{ lookup('hashi_vault', 'secret=secret/ssh/eingram:ssh_password') }}
+  KC_HTTPS_CERTIFICATE_FILE=/opt/keycloak/conf/tls.crt
+  KC_HTTPS_CERTIFICATE_KEY_FILE=/opt/keycloak/conf/tls.key
+command: start-dev
+volume:
+  - /opt/{{ app_name }}/tls.crt:/opt/keycloak/conf/tls.crt
+  - /opt/{{ app_name }}/tls.key:/opt/keycloak/conf/tls.key
