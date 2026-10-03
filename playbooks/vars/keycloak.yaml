@@ -3,7 +3,7 @@ app_name: "keycloak"
 user_account: "poduser"
 image_name: "keycloak"
 image_repo: "quay.io/keycloak"
-ver: "26.7.4"
+ver: "26.8.0"
 fw_port:
   - "8080/tcp"
   - "8443/tcp"
