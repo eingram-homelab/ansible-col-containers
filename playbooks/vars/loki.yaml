@@ -1,0 +1,17 @@
+---
+app_name: "loki"
+user_account: "poduser"
+image_name: "loki"
+image_repo: "docker.io/grafana"
+ver: "main-bc5700e"
+fw_port:
+  - "3100/tcp"
+publish_port:
+  - "3100:3100"
+command: >
+  -config.file=/etc/loki/local-config.yml
+user: 10001:10001
+volume:
+  - /opt/{{ app_name }}/local-config.yml:/etc/loki/local-config.yml
+  - /opt/{{ app_name }}/rules.yml:/tmp/loki/rules/fake/rules.yml
+  - "{{ app_name }}-data:/loki"
