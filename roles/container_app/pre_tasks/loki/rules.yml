@@ -1,0 +1,67 @@
+groups:
+- name: loki.rules
+  rules:
+  - alert: RainforestIntegrationDown
+    expr: |
+      sum(rate({container_name="homeassistant"} |= "issued command while not connected" [5m] )) > 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Rainforest integration down on (hostname {{ $labels.hostname }})
+      description: "Rainforest integration down on (hostname {{ $labels.hostname }})"
+  - alert: TigerBridgeCapExceeded
+    expr: |
+      sum(rate({channel="Tiger Bridge"} |= "Cannot upload files, storage cap exceeded" [5m] )) > 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Tiger Bridge Storage Cap Exceeded
+      description: "Tiger Bridge Storage Cap Exceeded"
+  - alert: TigerBridgeNoSuchFile
+    expr: |
+      sum(rate({channel="Tiger Bridge"} |= "Error: no such file" [5m] )) > 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Tiger Bridge Error - No Such File on (hostname {{ $labels.hostname }})
+      description: "Tiger Bridge No Such File Error"
+  - alert: IOError
+    expr: |
+      sum(rate({env="prod",level!="info"} |= "uncorrectable I/O failure" [5m] )) > 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Uncorrectable I/O failure on (hostname {{ $labels.hostname }}
+      description: "Uncorrectable I/O failure"
+  - alert: Test
+    expr: |
+      sum(rate({host="Veeam.local.lan"} |= "TestTest" | pattern "<message>" [5m])) by (message) > 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Test log extraaction
+      message: '{{ $labels.hostname }} {{`"{{ slice $labels.message 0 500 }}"`}}'
+  - alert: BackupFailure
+    expr: |
+      sum(rate({job="systemd-journal", level="error"} |= "Backup failed" [5m] )) by (hostname, job)  > 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: Backup failure detected on {{ $labels.hostname }}
+      description: "A backup failure has been detected on {{ $labels.hostname }}"
+  - alert: ProdErrorLogs
+    expr: |
+      sum(rate({job="systemd-journal", level="error"} |= `Backup failed` | pattern `<message>` [5m])) by (hostname, job, message) > 0
+    for: 0m
+    labels:
+      severity: critical
+    annotations:
+      summary: "There are Error logs on PROD"
+      # message: "{{`'{{ slice $labels.message 0 500 }}'`}}"
+      message: "{{ $labels.message }}"

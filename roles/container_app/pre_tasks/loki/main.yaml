@@ -1,0 +1,13 @@
+---
+- name: Copy loki config files to remote server
+  ansible.builtin.copy:
+    src: "{{ loki_item }}"
+    dest: /opt/{{ app_name }}/{{ loki_item }}
+    mode: '0644'
+    owner: "{{ user_account }}"
+    group: "{{ user_account }}"
+  loop:
+    - local-config.yml
+    - rules.yml
+  loop_control:
+    loop_var: "loki_item"
