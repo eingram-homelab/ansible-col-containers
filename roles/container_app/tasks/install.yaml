@@ -2,14 +2,14 @@
 - name: Check for pretasks for {{ app_name }}
   ansible.builtin.find:
     paths: "{{ role_path }}/pre_tasks/{{ app_name }}/"
-    patterns: "*.yaml"
+    patterns: "main.yaml"
   register: pretasks
   delegate_to: localhost
 
 - name: Check for posttasks for {{ app_name }}
   ansible.builtin.find:
     paths: "{{ role_path }}/post_tasks/{{ app_name }}"
-    patterns: "*.yaml"
+    patterns: "main.yaml"
   register: posttasks
   delegate_to: localhost
 

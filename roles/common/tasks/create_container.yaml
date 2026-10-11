@@ -7,6 +7,7 @@
     privileged: "{{ privileged | default(omit) }}"
     publish: "{{ publish_port }}"
     pod: "{{ pod_name | default(omit) }}"
+    user: "{{ user | default(omit) }}"
     env:
       "{{ env | default(omit) }}"
     tty: "{{ tty | default(omit) }}"

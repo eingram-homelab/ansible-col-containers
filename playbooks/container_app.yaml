@@ -25,11 +25,17 @@
         that:
           - app_name is defined
           - task is defined
-          - task in ['install', 'uninstall', 'upgrade']
+          - task in ['install', 'uninstall']
         fail_msg: |
           "The variables 'app_name', 'user_account', and 'task' must be defined."
-          "The 'task' variable must be set to either 'install', 'uninstall', or 'upgrade'."
+          "The 'task' variable must be set to either 'install', or 'uninstall'."
         success_msg: "All required variables are properly defined."
+
+    - name: Assert upgrade set correctly if used
+      ansible.builtin.assert:
+        that:
+          - (upgrade is not defined) or (task == "install")
+        fail_msg: "task must be set to 'install' if upgrading."
 
     - name: Manage container app - {{ app_name }}
       ansible.builtin.include_role:
