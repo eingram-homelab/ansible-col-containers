@@ -8,3 +8,5 @@ fw_port:
   - "9093/tcp"
 publish_port:
   - "9093:9093"
+volume:
+  - /opt/{{ app_name }}/alertmanager.yml:/etc/alertmanager/alertmanager.yml
