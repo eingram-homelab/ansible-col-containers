@@ -1,0 +1,14 @@
+---
+app_name: "blackbox_exporter"
+user_account: "poduser"
+image_name: "blackbox-exporter"
+image_repo: "quay.io/prometheus"
+ver: "v0.29.0"
+fw_port:
+  - "9115/tcp"
+publish_port:
+  - "9115:9115"
+volume:
+  - /opt/{{ app_name }}/blackbox.yml:/etc/blackbox_exporter/config.yml
+command:
+  - --config.file=/etc/blackbox_exporter/config.yml
