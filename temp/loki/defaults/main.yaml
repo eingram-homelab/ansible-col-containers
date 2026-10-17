@@ -1,9 +1,0 @@
----
-app_name: "loki"
-user_account: "poduser"
-image: "docker.io/grafana/loki"
-upgrade: "no"
-fw_port:
-  - "3100/tcp"
-publish_port:
-  - "3100:3100"

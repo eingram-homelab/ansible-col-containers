@@ -1,7 +1,0 @@
----
-- name: Restart grafana_agent container
-  containers.podman.podman_container:
-    name: grafana_agent
-    image: grafana/agent:{{ ver }}
-    state: started
-    restart: true
