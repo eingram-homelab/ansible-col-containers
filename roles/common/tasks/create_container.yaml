@@ -10,6 +10,9 @@
     user: "{{ user | default(omit) }}"
     env:
       "{{ env | default(omit) }}"
+    sysctl:
+      "{{ sysctl | default(omit) }}"
+    network_mode: "{{ network_mode | default(omit) }}"
     tty: "{{ tty | default(omit) }}"
     interactive: "{{ interactive | default(omit) }}"
     volume: "{{ volume | default(omit) }}"
