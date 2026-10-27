@@ -1,0 +1,47 @@
+---
+- name: Check for pretasks for {{ app_name }}
+  ansible.builtin.find:
+    paths: "{{ role_path }}/pre_tasks/{{ app_name }}/"
+    patterns: "main.yaml"
+  register: pretasks
+  delegate_to: localhost
+
+- name: Check for posttasks for {{ app_name }}
+  ansible.builtin.find:
+    paths: "{{ role_path }}/post_tasks/{{ app_name }}"
+    patterns: "main.yaml"
+  register: posttasks
+  delegate_to: localhost
+
+- name: Install env for {{ app_name }}
+  ansible.builtin.include_role:
+    name: eingram23.containers.common
+    tasks_from: create_env_docker
+
+- name: Run pretasks for {{ app_name }}
+  when: pretasks.matched > 0
+  ansible.builtin.include_tasks:
+    file: "{{ pretask_file.path }}"
+  loop: "{{ pretasks.files }}"
+  loop_control:
+    loop_var: pretask_file
+
+- name: Prep for upgrade
+  when: upgrade | default(false)
+  ansible.builtin.include_role:
+    name: eingram23.containers.container_app
+    tasks_from: upgrade_docker
+
+- name: Create container - {{ app_name }}
+  when: containers is not defined
+  ansible.builtin.include_role:
+    name: eingram23.containers.common
+    tasks_from: create_container_docker
+
+- name: Run posttasks for {{ app_name }}
+  when: posttasks.matched > 0
+  ansible.builtin.include_tasks:
+    file: "{{ posttask_file.path }}"
+  loop: "{{ posttasks.files }}"
+  loop_control:
+    loop_var: posttask_file

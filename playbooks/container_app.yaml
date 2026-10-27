@@ -5,19 +5,20 @@
   hosts: "{{ hostvar | default([]) }}"
   become: false
   gather_facts: false
+  # debugger: on_failed
 
   vars_files:
     - "vars/{{ app_name }}.yaml"
 
   tasks:
 
-    - name: Assert user_account is defined
+    - name: Assert user_account is defined if installing in podman env
       ansible.builtin.assert:
         that:
-          - user_account is defined
+          - docker | default(false) | bool or (user_account | default('') in ['root', 'poduser', 'shareaccess'])
         fail_msg: |
-          "The variable 'user_account' must be defined."
-          "If this is a monitoring container (e.g., cadvisor), specify which user account to install under."
+          The variable 'user_account' must be defined if installing in podman environment.
+          If this is a monitoring container (e.g., cadvisor), specify which user account to install under.
         success_msg: "The variable 'user_account' is properly defined."
 
     - name: Assert vars
@@ -37,7 +38,18 @@
           - (upgrade is not defined) or (task == "install")
         fail_msg: "task must be set to 'install' if upgrading."
 
-    - name: Manage container app - {{ app_name }}
+    - name: Manage container app for podman env - {{ app_name }}
+      when: not docker
       ansible.builtin.include_role:
         name: eingram23.containers.container_app
         tasks_from: "{{ task }}"
+
+    - name: Manage container app for docker  env - {{ app_name }}
+      when: docker
+      ansible.builtin.include_role:
+        name: eingram23.containers.container_app
+        tasks_from: "{{ task }}_docker"
+        apply:
+          become: true
+          become_user: root
+          become_method: ansible.builtin.sudo

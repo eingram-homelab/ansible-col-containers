@@ -4,7 +4,7 @@
     image: "{{ image_repo }}/{{ image_name }}:{{ ver }}"
     state: started
     restart_policy: always
-    privileged: "{{ privileged }}"
+    privileged: "{{ privileged | default(omit)}}"
     published_ports: "{{ publish_port }}"
     env:
       "{{ cont_env | default(omit) }}"
