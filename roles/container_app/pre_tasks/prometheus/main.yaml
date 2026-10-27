@@ -1,0 +1,13 @@
+---
+- name: Copy rules files
+  ansible.builtin.copy:
+    src: "{{ item }}"
+    dest: /opt/{{ app_name }}
+    mode: '0644'
+  with_fileglob: "{{ role_path }}/pre_tasks/prometheus/*.rules"
+
+- name: Copy prometheus config to remote server
+  ansible.builtin.copy:
+    src: prometheus.yml
+    dest: /opt/{{ app_name }}/
+    mode: '0644'
