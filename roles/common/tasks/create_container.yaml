@@ -7,9 +7,9 @@
     privileged: "{{ privileged | default(omit) }}"
     publish: "{{ publish_port }}"
     pod: "{{ pod_name | default(omit) }}"
-    user: "{{ user | default(omit) }}"
+    user: "{{ pod_user | default(omit) }}"
     env:
-      "{{ env | default(omit) }}"
+      "{{ pod_env | default(omit) }}"
     sysctl:
       "{{ sysctl | default(omit) }}"
     network_mode: "{{ network_mode | default(omit) }}"

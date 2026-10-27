@@ -42,7 +42,7 @@
       ignore_errors: true
 
     - name: Remove container - {{ app_name }}
-      when: 
+      when:
         - pod_info.pods | length > 0
         - pod_container.value.container_name in pod_info.pods[0].Containers | map(attribute='Name') | list
       containers.podman.podman_container:
