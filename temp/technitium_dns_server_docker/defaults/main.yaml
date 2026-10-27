@@ -1,9 +1,0 @@
----
-app_name: "dns_server"
-image: "docker.io/technitium/dns-server"
-upgrade: "no"
-publish_port:
-  - "5380:5380"
-  - "53:53"
-  - "53:53/udp"
-dhcp: "yes"
