@@ -1,0 +1,21 @@
+---
+app_name: "technitium_dns"
+docker: true
+image_name: "dns-server"
+image_repo: "docker.io/technitium"
+ver: "15.6.2"
+fw_port:
+  - "5380/tcp"
+  - "53/tcp"
+  - "53/udp"
+publish_port:
+  - "5380:5380"
+  - "53:53"
+  - "53:53/udp"
+user_account: "root"
+container_env:
+  DNS_SERVER_DOMAIN: "{{ inventory_hostname }}"
+  DNS_SERVER_ADMIN_PASSWORD: "{{ lookup('hashi_vault', 'secret=secret/ssh/eingram:ssh_password') }}"
+volume:
+  - "{{ app_name }}-data:/etc/dns"
+network_mode: "host"

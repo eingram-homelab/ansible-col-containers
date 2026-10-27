@@ -10,7 +10,7 @@ fw_port:
 publish_port:
   - "8080:8080"
   - "8443:8443"
-env:
+container_env:
   KC_BOOTSTRAP_ADMIN_USERNAME=admin
   KC_BOOTSTRAP_ADMIN_PASSWORD={{ lookup('hashi_vault', 'secret=secret/ssh/eingram:ssh_password') }}
   KC_HTTPS_CERTIFICATE_FILE=/opt/keycloak/conf/tls.crt

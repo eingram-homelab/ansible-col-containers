@@ -10,7 +10,7 @@ publish_port:
   - "3100:3100"
 command: >
   -config.file=/etc/loki/local-config.yml
-user: 10001:10001
+pod_user: 10001:10001
 volume:
   - /opt/{{ app_name }}/local-config.yml:/etc/loki/local-config.yml
   - /opt/{{ app_name }}/rules.yml:/tmp/loki/rules/fake/rules.yml
