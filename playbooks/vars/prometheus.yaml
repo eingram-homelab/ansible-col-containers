@@ -3,7 +3,7 @@ app_name: "prometheus"
 user_account: "poduser"
 image_name: "prometheus"
 image_repo: "docker.io/prom"
-ver: "v3.13.4"
+ver: "v3.15.1"
 fw_port:
   - "9090/tcp"
 publish_port:
