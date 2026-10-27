@@ -25,7 +25,7 @@ containers:
   unifi:
     image_repo: "lscr.io/linuxserver"
     ver: "10.3.58"
-    env:
+    container_env:
       PUID=1000
       PGID=1000
       MONGO_USER=unifi
